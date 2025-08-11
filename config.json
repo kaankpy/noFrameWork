@@ -1,0 +1,11 @@
+{
+  "OPENAI_API_KEY": "YOUR_API_KEY",
+  "OPENAI_API_BASE": "https://api.openai.com/v1",
+  "PLANNER_MODEL": "gpt-4o-mini",
+  "RESPONDER_MODEL": "gpt-4o-mini",
+  "DEFAULT_TEMPERATURE": 0.0,
+  "MAX_RETRIES": 3,
+  "RETRY_BACKOFF_SEC": 1.5,
+  "LOG_FILE": "agent_system.log.jsonl",
+  "DB_PATH": "memory.db"
+}
