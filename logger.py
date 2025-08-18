@@ -3,14 +3,6 @@ import time
 from config import LOG_FILE
 
 def log_event(kind: str, payload: dict):
-    # Input:
-    #   kind (str) - Log türü (ör: "planner", "executor", "responder")
-    #   payload (dict) - Log detayları
-    # Purpose:
-    #   Olayı JSON Lines formatında log dosyasına yazar.
-    # Output:
-    #   None
-    #pass
     entry = {
         "ts": time.time(),
         "kind": kind,

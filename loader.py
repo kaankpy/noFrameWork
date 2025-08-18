@@ -5,18 +5,25 @@ from typing import Dict, List
 AGENTS_DIR = "Agents"
 TOOLS_DIR = "tools"
 
-def load_agents() -> dict:
-    # Input: None
-    # Purpose:
-    #   Agents klasöründeki tüm JSON konfigürasyon dosyalarını yükler.
-    # Output:
-    #   dict - Agent adı -> agent config sözlüğü
-    pass
 
-def discover_tools() -> list:
-    # Input: None
-    # Purpose:
-    #   tools klasöründeki tüm tool tanımlarını listeler.
-    # Output:
-    #   list - Tool meta verilerinin listesi
-    pass
+def load_agents() -> Dict[str, dict]:
+    agents = {}
+    for filename in os.listdir(AGENTS_DIR):
+        if filename.endswith(".json"):
+            path = os.path.join(AGENTS_DIR, filename)
+            with open(path, "r", encoding="utf-8") as f:
+                config = json.load(f)
+                agent_name = os.path.splitext(filename)[0]
+                agents[agent_name] = config
+    return agents
+
+
+def discover_tools() -> List[dict]:
+    tools = []
+    for filename in os.listdir(TOOLS_DIR):
+        if filename.endswith(".py"):
+            tools.append({
+                "name": os.path.splitext(filename)[0],
+                "path": os.path.join(TOOLS_DIR, filename)
+            })
+    return tools

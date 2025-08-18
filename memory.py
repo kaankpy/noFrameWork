@@ -3,12 +3,6 @@ import json
 from config import DB_PATH
 
 def init_db():
-    # Input: None
-    # Purpose:
-    #   SQLite veya benzeri bir veritabanı başlatır.
-    # Output:
-    #   None
-    #pass
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
     cur.execute("""CREATE TABLE IF NOT EXISTS messages (
@@ -29,15 +23,6 @@ def init_db():
     conn.close()
 
 def save_message(role: str, content: str, meta: dict = None):
-    # Input:
-    #   role (str) - "user" veya "assistant"
-    #   content (str) - Mesaj içeriği
-    #   meta (dict) - Ek meta veri
-    # Purpose:
-    #   Mesajı veritabanına kaydeder.
-    # Output:
-    #   None
-    #pass
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
     cur.execute("INSERT INTO messages (role, content, meta) VALUES (?, ?, ?)",
@@ -45,12 +30,9 @@ def save_message(role: str, content: str, meta: dict = None):
     conn.commit(); conn.close()
 
 def save_tool_output(tool_name: str, output, meta: dict = None):
-    # Input:
-    #   tool_name (str) - Tool adı
-    #   output (any) - Tool çıktısı
-    #   meta (dict) - Ek meta veri
-    # Purpose:
-    #   Tool çıktısını veritabanına kaydeder.
-    # Output:
-    #   None
-    pass
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    cur.execute("INSERT INTO tool_outputs (tool_name, output, meta) VALUES (?, ?, ?)",
+                (tool_name, json.dumps(output), json.dumps(meta or {})))
+    conn.commit()
+    conn.close()
