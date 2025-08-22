@@ -44,4 +44,50 @@ A lightweight, framework-free agentic system in Python designed to execute compl
 2.  **Create a `config.json` file:**
     Copy the `config.json` example provided in the repository and fill in your LLM API key and desired model names.
 
-    
+## Agent Configuration (`agent.json`)
+
+Each agent in the `Agents/` directory is defined by a `.json` configuration file. This file specifies the agent's behavior, the language model it uses, and the tools it has access to.
+
+Here is a breakdown of the `agent.json` file structure:
+
+### Top-Level Properties
+
+*   **`name`**: (string) A unique identifier for the agent (e.g., `"computer_evaluation"`). This is used to select and invoke the agent.
+*   **`model`**: (string) The identifier for the language model to be used by the agent (e.g., `"gpt-3.5-turbo"`).
+*   **`description`**: (string) A concise summary of the agent's purpose and capabilities. This helps the system select the right agent for a given task.
+*   **`temperature`**: (float) A value between 0.0 and 2.0 that controls the randomness of the model's output. Higher values (e.g., `0.8`) result in more creative responses, while lower values produce more deterministic outputs.
+*   **`system_prompt`**: (string) The instructions given to the language model to define its persona, role, and the rules it must follow. It sets the context for the agent's responses.
+
+### `related_tools`
+
+This is an array of objects, where each object defines a tool available to the agent. The agent's logic will decide which of these tools are necessary to fulfill a user's request based on their descriptions.
+
+*   **`name`**: (string) The name of the tool function to be called (e.g., `"get_os_info"`).
+*   **`description`**: (string) A clear description of what the tool does. This is crucial for the agent to understand when to use the tool.
+*   **`expected_params`**: (array of strings) A list of parameters that the tool function expects. If the tool takes no parameters, this should be an empty array `[]`.
+
+### Example `agent.json`
+
+Here is a snippet from `Agents/computer_evaluation.json`:
+
+```json
+{
+  "name": "computer_evaluation",
+  "model": "gpt-3.5-turbo",
+  "description": "Agent that answers questions about the user's computer...",
+  "temperature": 0.8,
+  "system_prompt": "You are a computer evaluation agent...",
+  "related_tools": [
+    {
+      "name": "get_os_info",
+      "description": "Retrieves information about the operating system.",
+      "expected_params": []
+    },
+    {
+      "name": "get_cpu_info",
+      "description": "Retrieves information about the CPU.",
+      "expected_params": []
+    }
+  ]
+}
+```
