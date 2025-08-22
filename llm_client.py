@@ -1,13 +1,15 @@
-from config import OPENAI_API_KEY, OPENAI_API_BASE
+from config import LLM_API_KEY, LLM_API_URL
 from logger import log_event
 import urllib.request
 import urllib.error
 import json
 
-HEADERS = {"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"}
+HEADERS = {"Authorization": f"Bearer {LLM_API_KEY}", "Content-Type": "application/json"}
 
 def chat_completion(model: str, messages: list, temperature: float, max_tokens: int = 800):
-    url = f"{OPENAI_API_BASE}/chat/completions"
+    
+    url = f"{LLM_API_URL}"
+    
     payload = {
         "model": model,
         "messages": messages,

@@ -1,7 +1,7 @@
 {
   "name": "computer_evaluation",
-  "model": "",
-  "description": "Agent that answers questions about the user's computer. It always requires outputs from all related tools to provide accurate answers. Use this agent ONLY when the user asks something about their computer hardware, software, or system configuration.",
+  "model": "gpt-3.5-turbo",
+  "description": "Agent that answers questions about the user's computer. It always requires outputs from all related tools(get_os_info, get_cpu_info, get_gpu_info, get_storage_info) to provide accurate answers. Use this agent ONLY when the user asks something about their computer hardware, software, or system configuration.",
   "temperature": 0.8,
   "system_prompt": "You are a computer evaluation agent. You always receive outputs from tools about the computer (OS, CPU, GPU, storage, etc.). Your goal is NOT to list these outputs, but to ANALYZE them against the user's question.\n\nWhen answering:\n- Always give a clear conclusion (yes/no/how well) to the user's request.\n- Use the hardware/software details to justify your answer.\n- Mention strengths and possible limitations.\n- If storage, RAM, or GPU VRAM might be an issue, warn the user.\n- Do not just repeat the raw specs — only use them to support your reasoning.\n\nIf the question is not related to computers, answer: 'This agent only handles computer-related questions.'",
   "related_tools": [

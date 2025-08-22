@@ -1,14 +1,12 @@
 from llm_client import chat_completion
 from memory import save_message, save_tool_output
-from logger import log_event
 import importlib
 
 AGENTS_DIR = "Agents"
 
 def execute_plan(plan: dict, agents_dir=AGENTS_DIR, user_input=""):
 
-    aggregated_results = {}
-    aggregated_results[user_input] = user_input
+    aggregated_results = {"initial_request": user_input}
     
     for step in plan.get("steps", []):
 

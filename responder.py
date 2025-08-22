@@ -1,8 +1,8 @@
 import logging
 from llm_client import chat_completion
-from config import RESPONDER_MODEL, DEFAULT_TEMPERATURE, MAX_RETRIES, RETRY_BACKOFF_SEC
+from config import RESPONDER_MODEL, DEFAULT_TEMPERATURE
 
-def generate_final_response(orchestrator_output, aggregated_results):
+def generate_final_response(orchestrator_output, aggregated_results, current_user_input):
 
     try:
         results_text = "\n".join([
@@ -13,15 +13,24 @@ def generate_final_response(orchestrator_output, aggregated_results):
         responder = {
             "name": "responder_agent",
             "description": "The main agent that coordinates other agents and tools.",
-            "system_prompt": "You are the responder agent. Your job is to generate a final response for the user based on the outputs of other agents and tools."
+            "system_prompt": (
+                "You are the responder agent. Your job is to generate a final, user-facing response. "
+                "Analyze the user's most recent message and the collected results. "
+                "If the user's message is a simple conversational closing (like 'thank you', 'ok', 'bye'), "
+                "respond with a polite, conversational closing (e.g., 'You're welcome!'). Do not summarize previous work in this case. "
+                "Otherwise, synthesize the results into a comprehensive answer that directly addresses the user's request."
+                "User may also ask follow-up questions or request additional information."
+                "User may give input in different languages. Answer in the user's language."
+            )
         }
 
         user_prompt = (
-            f"The orchestrator produced the following plan/output:\n"
+            f"User's most recent message: '{current_user_input}'\n\n"
+            f"Orchestrator's plan/output:\n"
             f"{orchestrator_output}\n\n"
-            f"The following intermediate results were collected:\n"
+            f"Collected intermediate results:\n"
             f"{results_text}\n\n"
-            f"Please generate a clear and helpful final response for the user."
+            f"Please generate the final response for the user."
         )
 
         messages = [

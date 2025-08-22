@@ -6,30 +6,26 @@ from logger import log_event
 
 
 def build_planner_prompt(user_input: str, available_agents: list, available_tools: list):
-
-    orchestrator = {
-        "name": "orchestrator_agent",
-        "description": "The main agent that coordinates other agents and tools.",
-        "system_prompt": """You are the orchestrator agent. Your job is to decide which agents and/or tools should handle the user request, in what order, and with what parameters. 
-        Return ONLY strictly valid JSON with this shape and NO extra text, explanation, or formatting:
-        {
-        "steps": [
-            {"id":"s1","type":"agent|tool","name":"...","depends_on": ["s0"]},
-            {"id":"s2","type":"agent|tool","name":"...","depends_on": ["s1"]},
-            {"id":"s3","type":"agent|tool","name":"...","depends_on": ["s2"]},
-            {"id":"s4","type":"agent|tool","name":"...","depends_on": ["s1","s2"]},
-            {"id":"s5","type":"agent|tool","name":"...","depends_on": ["s4"]}
-        ]
-        }
-        Notes:
-        - You must output ONLY the JSON object as specified above, with no extra text, explanations, or formatting before or after the JSON.
-
-        - Agents may require results from related tools before running.
-        - Use `depends_on` to specify if an agent needs outputs from tools or vice versa (e.g., an agent step can depend on tool steps or a tool step can depend on an agent step).
-        - Keep plan concise and deterministic (i.e., always produce the same plan for the same input; avoid randomness or arbitrary choices)."""
-    }
-
-    system_prompt = orchestrator.get("system_prompt", "")
+    system_prompt = """You are the orchestrator agent. Your job is to decide which agents and/or tools should handle the user request, in what order, and with what parameters.
+Your primary focus is the 'CURRENT USER REQUEST' section of the user's message.
+Return ONLY strictly valid JSON with this shape and NO extra text, explanation, or formatting:
+{
+"steps": [
+    {"id":"s1","type":"agent|tool","name":"...","depends_on": []},
+    {"id":"s2","type":"agent|tool","name":"...","depends_on": ["s1"]},
+    {"id":"s3","type":"agent|tool","name":"...","depends_on": ["s2"]},
+    {"id":"s4","type":"agent|tool","name":"...","depends_on": ["s1","s2"]},
+    {"id":"s5","type":"agent|tool","name":"...","depends_on": ["s4"]}
+]
+}
+Notes:
+- If the 'CURRENT USER REQUEST' is a simple greeting, question, or conversational remark (e.g., "hello", "how are you?", "thank you") that does not require any tools or information gathering, return an empty plan: `{"steps": []}`.
+- You must output ONLY the JSON object as specified above, with no extra text, explanations, or formatting.
+- Review the 'PREVIOUSLY GATHERED INFORMATION' section in the conversation context. If a tool was called before for a similar request and its output is unlikely to have changed (e.g., OS version), do NOT include that tool in the plan again. The previous results are available to subsequent agents.
+- **Dependency Rule**: Steps can depend on each other. For example, an agent might need data from a tool, or a tool might need data from an agent. If a step requires data from another, you must create a separate step for each. The step that needs the data must list the `id` of the step that provides it in its `depends_on` array. Every `id` listed in a `depends_on` array MUST correspond to another step's `id` within the same plan.
+- **Tool Parameters**: When adding a `tool` step, check its definition for required parameters. If so, add a `params` dictionary to the step. The values for these parameters should be filled if they are static or can be taken directly from the user's request. The agent descriptions may provide hints on which tools to use and what parameters they expect (`related_tools`, `expected_params`).
+- **Step Order**: The `steps` array should be logically ordered. If a step `s2` depends on `s1`, then `s1` should appear before `s2` in the array.
+- Keep plan concise and deterministic (i.e., always produce the same plan for the same input; avoid randomness or arbitrary choices)."""
 
     agents_text = "\n".join([
     f"- {a.get('name', '')}: {a.get('description', '')} "
@@ -48,17 +44,17 @@ def build_planner_prompt(user_input: str, available_agents: list, available_tool
         tools_text = "No available tools."
 
 
-    prompt = f"""
+    prompt = f"""This is the conversation context:
+{user_input}
+
+---
+Here are the resources you can use to fulfill the CURRENT USER REQUEST:
 
 Available agents:
 {agents_text}
 
 Available tools:
 {tools_text}
-
-User request:
-{user_input}
-
 """
     return prompt, system_prompt
 

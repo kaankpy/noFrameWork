@@ -1,11 +1,11 @@
 {
-  "OPENAI_API_KEY": "YOUR_OPENAI_API_KEY_HERE",
-  "OPENAI_API_BASE": "YOUR_API_BASE_URL_IF_NEEDED",
-  "PLANNER_MODEL": "gpt-4-turbo",
-  "RESPONDER_MODEL": "gpt-4-turbo",
-  "DEFAULT_TEMPERATURE": 0.7,
+  "LLM_API_KEY": "[Your LLM_API_KEY]",
+  "LLM_API_URL": "[Your LLM_API_URL]",
+  "PLANNER_MODEL": "[Your PLANNER_MODEL]",
+  "RESPONDER_MODEL": "[Your RESPONDER_MODEL]",
+  "DEFAULT_TEMPERATURE": 1,
   "MAX_RETRIES": 3,
   "RETRY_BACKOFF_SEC": 1.5,
-  "LOG_FILE": "agent_system.log.jsonl",
-  "DB_PATH": "memory.db"
+  "DB_PATH": "memory.db",
+  "MAX_HISTORY_WINDOW": 4
 }
