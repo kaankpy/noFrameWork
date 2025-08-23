@@ -91,3 +91,40 @@ Here is a snippet from `Agents/computer_evaluation.json`:
   ]
 }
 ```
+flowchart LR
+    A[User Input] --> B[main.py]
+    B --> C[planner.plan_with_retry()]
+    C -->|Plan (JSON: steps, depends_on)| D[executor.execute_plan()]
+
+    subgraph EXECUTION
+        D --> E{Step: tool or agent?}
+        E -->|tool| F[Run Tool (tools/*.py)]
+        E -->|agent| G[LLM Call (llm_client.chat_completion)]
+        F --> H[Save Tool Output → memory.save_tool_output]
+        G --> I[Save Msg → memory.save_message]
+        H --> J[aggregated_results]
+        I --> J
+        J -->|Dependency Resolution| D
+    end
+
+    D --> K[responder.generate_final_response()]
+    K -->|LLM (Responder)| L[Final Answer]
+    L --> M[Display to User]
+
+    %% Cross-cutting concerns
+    classDef aux fill:#f5f5f5,stroke:#bbb,color:#333;
+
+    subgraph Infra & Observability
+        N[config.json → config.py]:::aux
+        O[logger.log_event]:::aux
+        P[memory.init_db / SQLite]:::aux
+        Q[Retry & Backoff]:::aux
+    end
+
+    B -. load_agents / discover_tools .-> C
+    B -. init_db .-> P
+    C -. uses .-> Q
+    D -. logs .-> O
+    F -. reads .-> N
+    G -. reads .-> N
+    K -. logs .-> O
