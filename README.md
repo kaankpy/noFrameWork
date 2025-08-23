@@ -2,6 +2,8 @@
 
 A lightweight, framework-free agentic system in Python designed to execute complex tasks by planning and coordinating multiple agents and tools.
 
+Example Agent(Computer Evaluator and it's tools have been uploaded)
+
 ## Features
 
 - **Modular Agent Architecture**: Easily define and load different agents with their own system prompts and configurations from JSON files.
@@ -91,3 +93,4 @@ Here is a snippet from `Agents/computer_evaluation.json`:
   ]
 }
 ```
+
