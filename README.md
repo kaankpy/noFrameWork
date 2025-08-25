@@ -1,4 +1,4 @@
--Project is only OPENAI API compatible for now.
+-Project is only OPENAI API compatible for now...
 # noFramework Multi-Agent System
 
 A lightweight, framework-free agentic system in Python designed to execute complex tasks by planning and coordinating multiple agents and tools.
@@ -94,6 +94,7 @@ Here is a snippet from `Agents/computer_evaluation.json`:
   ]
 }
 ```
+
 
 
 
