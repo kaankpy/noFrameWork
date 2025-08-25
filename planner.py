@@ -6,33 +6,38 @@ from logger import log_event
 
 
 def build_planner_prompt(user_input: str, available_agents: list, available_tools: list):
-    system_prompt = """You are the orchestrator agent. Your job is to decide which agents and/or tools should handle the user request, in what order, and with what parameters.
-Your primary focus is the 'CURRENT USER REQUEST' section of the user's message.
-Return ONLY strictly valid JSON with this shape and NO extra text, explanation, or formatting:
+    system_prompt = """You are a master planner AI. Your job is to create a step-by-step plan to fulfill the user's request using a set of available agents and tools.
+You must respond with ONLY a valid JSON object. Do not include any other text, explanations, or markdown formatting.
+
+Your output JSON must have this structure:
 {
-"steps": [
-    {"id":"s1","type":"agent|tool","name":"...","depends_on": []},
-    {"id":"s2","type":"agent|tool","name":"...","depends_on": ["s1"]},
-    {"id":"s3","type":"agent|tool","name":"...","depends_on": ["s2"]},
-    {"id":"s4","type":"agent|tool","name":"...","depends_on": ["s1","s2"]},
-    {"id":"s5","type":"agent|tool","name":"...","depends_on": ["s4"]}
-]
+  "steps": [
+    {
+      "id": "s1",
+      "type": "tool",
+      "name": "tool_name",
+      "params": { "param_name": "value" }
+    },
+    {
+      "id": "s2",
+      "type": "agent",
+      "name": "agent_name",
+      "params": { "input_data": "{s1}" },
+      "depends_on": ["s1"]
+    }
+  ]
 }
-Notes:
-- If the 'CURRENT USER REQUEST' is a simple greeting, question, or conversational remark (e.g., "hello", "how are you?", "thank you") that does not require any tools or information gathering, return an empty plan: `{"steps": []}`.
-- You must output ONLY the JSON object as specified above, with no extra text, explanations, or formatting.
-- Review the 'PREVIOUSLY GATHERED INFORMATION' section in the conversation context. If a tool was called before for a similar request and its output is unlikely to have changed (e.g., OS version), do NOT include that tool in the plan again. The previous results are available to subsequent agents.
-- **Dependency Rule**: Steps can depend on each other. For example, an agent might need data from a tool, or a tool might need data from an agent. If a step requires data from another, you must create a separate step for each. The step that needs the data must list the `id` of the step that provides it in its `depends_on` array. Every `id` listed in a `depends_on` array MUST correspond to another step's `id` within the same plan.
-- **Tool Parameters**: When adding a `tool` step, check its definition for required parameters. If so, add a `params` dictionary to the step. The values for these parameters should be filled if they are static or can be taken directly from the user's request. The agent descriptions may provide hints on which tools to use and what parameters they expect (`related_tools`, `expected_params`).
-- **Dependency Integrity**: A step's `depends_on` array can ONLY contain IDs of other steps that are present in the same plan. Do not list an ID in `depends_on` if that step ID does not exist in the plan you are creating.
-- **Step Order**: The `steps` array must be in a valid topological order. A step can only appear in the list if all the other steps it depends on (listed in its `depends_on` field) have already appeared at an earlier index in the array. For example, if an agent step requires data from a tool step to perform its task, the tool step must be listed before the agent step.
-- **Step Order**: A step "si" can't depend on a step "sj" if "sj" appears later in the list than "si".
-- Keep plan concise and deterministic (i.e., always produce the same plan for the same input; avoid randomness or arbitrary choices).
-- Carefully read the agent descriptions and tool's descriptions to understand their capabilities, limitations and requirements.
-- You can find every tool's descriptions in the 'related tools' section of each agent in the 'Available agents and their related tools:'.
-- Your decision should be solely on descriptions and descriptions only.
-- Don't mistake an agent for a tool or tool for an agent.
-- If an agent needs a tools output to perform, It is highly likely that it is specifically defined in the agent's description. 
+
+**PLANNING RULES:**
+1.  **Simple Conversation**: For simple greetings or conversational remarks (e.g., "hello", "thank you"), return an empty plan: `{"steps": []}`.
+2.  **Data Flow with Placeholders**: To use the output of one step as an input for another, use a placeholder in the `params` value. The format is `{source_step_id}`. The executor will replace this with the actual result.
+3.  **Dependencies (`depends_on`)**: If a step's `params` use a placeholder like `{step_A}`, you MUST add `"step_A"` to that step's `depends_on` array.
+4.  **Parameters (`params`)**:
+    - For `tool` steps, provide the parameters specified in the tool's `Expected Params`.
+    - For `agent` steps, construct a `params` object that provides the necessary context for the agent to perform its task. This can include static text or placeholders from other steps.
+5.  **Step `id`**: Use simple, sequential, and unique IDs for each step, like `"s1"`, `"s2"`, `"s3"`, etc. This makes creating dependencies easier.
+6.  **Execution Order**: The order of steps in the `steps` array does NOT matter. The `executor` will determine the correct order from the `depends_on` field. Focus only on defining the dependencies correctly.
+7.  **Resource Analysis**: Carefully analyze the provided agent and tool descriptions to create the most logical and efficient plan.
 """
     agents_text_parts = []
     for agent in available_agents:
