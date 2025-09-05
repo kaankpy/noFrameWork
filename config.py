@@ -8,8 +8,12 @@ if not _cfg_path.exists():
 with open(_cfg_path, "r", encoding="utf-8") as f:
     _cfg = json.load(f)
 
-LLM_API_KEY = _cfg.get("LLM_API_KEY")
-LLM_API_URL = _cfg.get("LLM_API_URL")
+OPENAI_API_KEY = _cfg.get("OPENAI_API_KEY")
+OPENAI_API_URL = _cfg.get("OPENAI_API_URL", "https://api.openai.com/v1/chat/completions")
+ANTHROPIC_API_KEY = _cfg.get("ANTHROPIC_API_KEY")
+ANTHROPIC_API_URL = _cfg.get("ANTHROPIC_API_URL", "https://api.anthropic.com/v1/messages")
+GOOGLE_API_KEY = _cfg.get("GOOGLE_API_KEY")
+GOOGLE_API_URL = _cfg.get("GOOGLE_API_URL", "https://api.google.com/v1/chat/completions")
 PLANNER_MODEL = _cfg.get("PLANNER_MODEL")
 RESPONDER_MODEL = _cfg.get("RESPONDER_MODEL")
 DEFAULT_TEMPERATURE = _cfg.get("DEFAULT_TEMPERATURE", 0.0)
